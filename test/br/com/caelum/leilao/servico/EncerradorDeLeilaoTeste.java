@@ -29,6 +29,7 @@ public class EncerradorDeLeilaoTeste {
         Calendar antigas = Calendar.getInstance();
         antigas.set(2000, 12, 2);
         
+        
         Leilao leilao1 = new CriadorDeLeilao().para("Super Famicom").naData(antigas).constroi();
         Leilao leilao2 = new CriadorDeLeilao().para("Nintendo 64").naData(antigas).constroi();
         
@@ -47,6 +48,13 @@ public class EncerradorDeLeilaoTeste {
         Assert.assertTrue(leilao2.isEncerrado());
         Assert.assertEquals(2, encerrador.getTotalEncerrados(), 0.00001);
         
+    }
+    
+    @Test
+    public void NaoDeveEncerrarLeiloesCriadosOntem() {
         
+        int ontem = Calendar.
+        
+        System.out.println(ontem);
     }
 }

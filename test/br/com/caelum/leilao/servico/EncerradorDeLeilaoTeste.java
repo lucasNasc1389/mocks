@@ -17,6 +17,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -43,6 +44,7 @@ public class EncerradorDeLeilaoTeste {
         
         //Criando Mock
         RepositorioDeLeiloes daoFalso = mock(RepositorioDeLeiloes.class);
+        
         EnviadorDeEmail carteiro =  mock(EnviadorDeEmail.class);
         //ensinando o mock a reagir da maneira que esperamos
         when(daoFalso.correntes()).thenReturn(leiloesAntigos);
@@ -147,5 +149,35 @@ public class EncerradorDeLeilaoTeste {
 
         verify(daoFalso, never()).atualiza(leilao1);
         verify(daoFalso, never()).atualiza(leilao2);
+    }
+    
+    @Test
+    public void deveContinuarAExecucaoMesmoQuandoDaoForFalha() {
+        Calendar antiga = Calendar.getInstance();
+        antiga.set(1999,1,20);
+        
+        Leilao leilao1 = new CriadorDeLeilao().para("TV de plasma")
+            .naData(antiga).constroi();
+        Leilao leilao2 = new CriadorDeLeilao().para("Geladeira")
+            .naData(antiga).constroi();
+        
+        RepositorioDeLeiloes daoFalso = mock(RepositorioDeLeiloes.class);
+        when(daoFalso.correntes()).thenReturn(Arrays.asList(leilao1,leilao2));
+        
+        doThrow(new RuntimeException()).when(daoFalso).atualiza(leilao1);
+        
+        EnviadorDeEmail carteiroFalso = mock(EnviadorDeEmail.class);
+        EncerradorDeLeilao encerrador = 
+            new EncerradorDeLeilao(daoFalso, carteiroFalso);
+
+        encerrador.encerra();
+
+        verify(daoFalso).atualiza(leilao2);
+        verify(carteiroFalso).envia(leilao2);
+    }
+    
+    @Test
+    public void deveContinuarAExecucaoMesmoQuandoOEncerradorDeEmailFalha() {
+        
     }
 }
